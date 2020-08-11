@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        tools:context=".MainActivity"
+        android:fitsSystemWindows="true">
+
+
+    <Button
+            android:id="@+id/activity_simple"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="32dp"
+            android:onClick="onSimpleActivityClick"
+            android:text="@string/simple" />
+
+    <Button
+            android:id="@+id/activity_zoomlayout"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="32dp"
+            android:onClick="onCustomActivityClick"
+            android:text="@string/custom" />
+
+    <Button
+            android:id="@+id/activity_rv"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="32dp"
+            android:onClick="onRecyclerViewActivityClick"
+            android:text="@string/recyclerview" />
+
+</LinearLayout>
