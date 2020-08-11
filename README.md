@@ -1,3 +1,5 @@
+![ZoomHelper](Previews/header.png)
+
 # ZoomHelper
 ZoomHelper will make any view to be zoomable just like the Instagram pinch-to-zoom. :wink:
 
@@ -5,7 +7,7 @@ ZoomHelper will make any view to be zoomable just like the Instagram pinch-to-zo
 
 ## Installation
 
-ZoomHelper is available in the JCenter, so you just need to add it as a dependency
+ZoomHelper is available in the JCenter, so you just need to add it as a dependency (Module gradle)
 
 Gradle
 ```gradle
@@ -13,7 +15,7 @@ implementation 'com.aghajari.zoomhelper:ZoomHelper:1.0.1'
 ```
 
 Maven
-```maven
+```xml
 <dependency>
 	<groupId>com.aghajari.zoomhelper</groupId>
 	<artifactId>ZoomHelper</artifactId>
@@ -22,7 +24,7 @@ Maven
 </dependency>
 ```
 
-## Usage 
+## Usage (Kotlin)
 
 just override dispatchTouchEvent in your Activity and pass all touch events to ZoomHelper!
 ```kotlin
@@ -37,7 +39,7 @@ And set View to be zoomable :
 ```kotlin
 
 ZoomHelper.addZoomableView(view)
-// ZoomHelper.addZoomableView(view,tag)
+//ZoomHelper.addZoomableView(view,tag)
 
 ```
 
@@ -51,10 +53,55 @@ Or make a zoomable View by using xml layout :
         <tag android:id="@+id/zoomable" android:value="ZoomableViewTag" />
 </ImageView>
 ```
+*Note: \<tag\> is only used in API level 21 and higher*
 
 And we are Done! :smiley:
 
+
+
+## Usage (Java)
+**Installation:** you have to add kotlin as a dependency! (Module gradle)
+```gradle
+implementation 'com.aghajari.zoomhelper:ZoomHelper:1.0.1'
+implementation 'org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion' //1.4.0-rc
+```
+
+and just override dispatchTouchEvent in your Activity and pass all touch events to ZoomHelper!
+```java
+
+@Override
+public boolean dispatchTouchEvent(MotionEvent ev) {
+	return ZoomHelper.Companion.getInstance().dispatchTouchEvent(ev,this) || super.dispatchTouchEvent(ev);
+}
+            
+```
+
+And set View to be zoomable :
+```java
+
+ZoomHelper.Companion.addZoomableView(view);
+//ZoomHelper.Companion.addZoomableView(view,tag);
+
+```
+
+Or make a zoomable View by using xml layout :
+```xml
+<ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <tag android:id="@+id/zoomable" android:value="ZoomableViewTag" />
+</ImageView>
+```
+*Note: \<tag\> is only used in API level 21 and higher*
+
+And we are Done! :smiley:
+
+
+
 ## Customization
+**Kotlin:**
 ```kotlin
 ZoomHelper.getInstance().minScale = 1f
 ZoomHelper.getInstance().maxScale = Float.MAX_VALUE
@@ -64,6 +111,18 @@ ZoomHelper.getInstance().shadowAlphaFactory = 4
 ZoomHelper.getInstance().dismissDuration = 200
 ZoomHelper.getInstance().layoutTheme = android.R.style.Theme_Translucent_NoTitleBar_Fullscreen
 ZoomHelper.getInstance().isEnabled = true
+```
+**Java:**
+```Java
+ZoomHelper zoomHelper = ZoomHelper.Companion.getInstance();
+zoomHelper.setMinScale(1f);
+zoomHelper.setMaxScale(Float.MAX_VALUE);
+zoomHelper.setShadowColor(Color.BLACK);
+zoomHelper.setMaxShadowAlpha(0.6f);
+zoomHelper.setShadowAlphaFactory(4);
+zoomHelper.setDismissDuration(200);
+zoomHelper.setLayoutTheme(android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+zoomHelper.setEnabled(true);
 ```
 
 ![ZoomHelper (Simple)](Previews/ZoomHelper-simple.gif)    ![ZoomHelper (Custom)](Previews/ZoomHelper-custom.gif)
@@ -114,7 +173,7 @@ Also the default view listeners (onClick,onLongClick,onTouch) will work as well!
 ## Author
 Amir Hossein Aghajari
 
-Inspired by [ImageZoomHelper](https://github.com/okaybroda/ImageZoom) library.
+Inspired by [ImageZoom](https://github.com/okaybroda/ImageZoom) library.
 
 License
 =======
