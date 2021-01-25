@@ -1,0 +1,7 @@
+siteUrl = https://github.com/Aghajari/ZoomHelper
+gitUrl = https://github.com/Aghajari/ZoomHelper.git
+version = 1.0.2
+groupId = com.aghajari.zoomhelper
+licenses = ['Apache-2.0']
+id = ZoomHelper
+name = ZoomHelper

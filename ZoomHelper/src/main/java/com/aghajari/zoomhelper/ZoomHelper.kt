@@ -16,7 +16,7 @@ import kotlin.math.min
 
 /**
  * @author AmirHossein Aghajari
- * @version 1.0.1
+ * @version 1.0.2
  */
 class ZoomHelper {
 
@@ -103,6 +103,7 @@ class ZoomHelper {
     var placeHolderDelay:Long = 80
     var placeHolderDismissDelay:Long = 30
     private var placeHolderEnabled = true
+
     var isPlaceHolderEnabled : Boolean
         get() = placeHolderEnabled
         set(value) {
@@ -136,6 +137,15 @@ class ZoomHelper {
     }
 
     /**
+     * handle touch event for a Fragment
+     * call this method in [Activity.dispatchTouchEvent]
+     */
+    fun dispatchTouchEvent(ev: MotionEvent,fragment:androidx.fragment.app.Fragment) :Boolean{
+        if (fragment.view == null) return false;
+        return load(ev,fragment.view!!)
+    }
+
+    /**
      * handle touch event for an Activity
      * call this method in [Activity.dispatchTouchEvent]
      */
@@ -159,7 +169,7 @@ class ZoomHelper {
 
         if (ev.pointerCount>=2){
             if (zoomableView==null){
-                var view:View? = Utils.findZoomableView(ev, *parents) ?: return false;
+                val view:View? = Utils.findZoomableView(ev, *parents) ?: return false;
                 zoomableView = view;
 
                 reset()
@@ -168,7 +178,7 @@ class ZoomHelper {
                 originalXY = IntArray(2)
                 view?.getLocationOnScreen(originalXY)
 
-                var frameLayout = FrameLayout(context)
+                val frameLayout = FrameLayout(context)
                 shadowView = View(context)
                 shadowView?.setBackgroundColor(shadowColor)
                 shadowView?.alpha = 0f
@@ -195,13 +205,17 @@ class ZoomHelper {
                 placeHolderView = PlaceHolderView(view)
                 placeHolderView?.isEnabled = placeHolderEnabled
 
-                var index: Int = viewIndex ?:0
+                val index: Int = viewIndex ?:0
                 zoomableViewParent?.addView(placeHolderView,index,viewLayoutParams)
                 zoomableViewParent?.removeView(view)
                 frameLayout.addView(zoomableView,viewFrameLayoutParams)
 
                 if (placeHolderEnabled) {
                     view.postDelayed(Runnable {
+                        if (zoomableView == null || zoomableView!!.parent == null || placeHolderView == null) {
+                            dismissDialog()
+                            return@Runnable
+                        }
                         placeHolderView!!.visibility = View.INVISIBLE
                     }, placeHolderDelay)
                 }
@@ -226,9 +240,9 @@ class ZoomHelper {
                 val p2 = MotionEvent.PointerCoords()
                 ev.getPointerCoords(1,p2)
 
-                var newCenter = intArrayOf(((p2.x+p1.x)/2).toInt(),((p2.y+p1.y)/2).toInt())
-                var currentDistance = Utils.getDistance(p1.x.toDouble(),p1.y.toDouble(),p2.x.toDouble(),p2.y.toDouble())
-                var pctIncrease = (currentDistance.toDouble() - originalDistance.toDouble()) / originalDistance.toDouble();
+                val newCenter = intArrayOf(((p2.x+p1.x)/2).toInt(),((p2.y+p1.y)/2).toInt())
+                val currentDistance = Utils.getDistance(p1.x.toDouble(),p1.y.toDouble(),p2.x.toDouble(),p2.y.toDouble())
+                val pctIncrease = (currentDistance.toDouble() - originalDistance.toDouble()) / originalDistance.toDouble();
 
                 zoomableView!!.pivotX = pivotX
                 zoomableView!!.pivotY = pivotY
@@ -289,7 +303,7 @@ class ZoomHelper {
         valueAnimator.duration = dismissDuration
         valueAnimator.addUpdateListener{
             val animatedFraction = it.animatedFraction
-            if (zoomableView!=null){
+            if (zoomableView!=null && zoomableView!!.parent!=null){
                 updateZoomableView(animatedFraction,scaleYStart,scaleXStart,leftMarginStart
                     ,topMarginStart,scaleXEnd,scaleYEnd,leftMarginEnd,topMarginEnd)
             }
@@ -307,7 +321,7 @@ class ZoomHelper {
             }
 
             private fun end(){
-                if (zoomableView!=null){
+                if (zoomableView!=null && zoomableView!!.parent!=null){
                     updateZoomableView(1f,scaleYStart,scaleXStart,leftMarginStart
                                     ,topMarginStart,scaleXEnd,scaleYEnd,leftMarginEnd,topMarginEnd)
                 }
@@ -343,22 +357,30 @@ class ZoomHelper {
     }
 
     private fun dismissDialogAndViews(){
-        if (zoomableView!=null){
+        if (zoomableView!=null && zoomableView!!.parent!=null){
             zoomableView?.visibility = View.VISIBLE
             if (placeHolderEnabled) {
                 placeHolderView?.visibility = View.VISIBLE
                 placeHolderView?.postDelayed(Runnable {
+                    if (zoomableView == null || zoomableView!!.parent == null) {
+                        dismissDialog()
+                        return@Runnable
+                    }
                     val parent = zoomableView!!.parent as ViewGroup;
                     parent.removeView(zoomableView)
-                    zoomableViewParent?.addView(zoomableView!!, viewIndex!!, viewLayoutParams)
-                    zoomableViewParent?.removeView(placeHolderView)
+                    if (zoomableViewParent!=null) {
+                        zoomableViewParent?.addView(zoomableView!!, viewIndex!!, viewLayoutParams)
+                        zoomableViewParent?.removeView(placeHolderView)
+                    }
                     dismissDialog()
                 }, placeHolderDismissDelay)
             }else{
                 val parent = zoomableView!!.parent as ViewGroup;
                 parent.removeView(zoomableView)
-                zoomableViewParent?.addView(zoomableView!!, viewIndex!!, viewLayoutParams)
-                zoomableViewParent?.removeView(placeHolderView)
+                if (zoomableViewParent!=null) {
+                    zoomableViewParent?.addView(zoomableView!!, viewIndex!!, viewLayoutParams)
+                    zoomableViewParent?.removeView(placeHolderView)
+                }
                 dismissDialog()
             }
         }else{
