@@ -16,7 +16,7 @@ import kotlin.math.min
 
 /**
  * @author AmirHossein Aghajari
- * @version 1.0.2
+ * @version 1.1.0
  */
 class ZoomHelper {
 
@@ -54,19 +54,20 @@ class ZoomHelper {
 
     private var originalXY: IntArray? = null
     private var twoPointerCenter: IntArray? = null
-    private var viewIndex:Int? = 0
-    private var originalDistance:Int = 0
-    private var pivotX:Float = 0f
-    private var pivotY:Float = 0f
-    private var viewLayoutParams:ViewGroup.LayoutParams? =null
-    private var viewFrameLayoutParams:FrameLayout.LayoutParams? =null
-    private var placeHolderView:PlaceHolderView? = null
+    private var viewIndex: Int? = 0
+    private var originalDistance: Int = 0
+    private var pivotX: Float = 0f
+    private var pivotY: Float = 0f
+    private var viewLayoutParams: ViewGroup.LayoutParams? = null
+    private var viewFrameLayoutParams: FrameLayout.LayoutParams? = null
+    private var placeHolderView: PlaceHolderView? = null
 
     /**
      * max zoom scale, or -1 for unlimited [Float.MAX_VALUE]
      * default: -1 [Float.MAX_VALUE]
      */
     var maxScale = -1f
+
     /**
      * min zoom scale, or -1 for unlimited [Float.MIN_VALUE]
      * default: 1f
@@ -98,13 +99,13 @@ class ZoomHelper {
      * dismiss animation duration
      * default: android default shortAnimTime
      */
-    var dismissDuration:Long = -1
+    var dismissDuration: Long = -1
 
-    var placeHolderDelay:Long = 80
-    var placeHolderDismissDelay:Long = 30
+    var placeHolderDelay: Long = 80
+    var placeHolderDismissDelay: Long = 30
     private var placeHolderEnabled = true
 
-    var isPlaceHolderEnabled : Boolean
+    var isPlaceHolderEnabled: Boolean
         get() = placeHolderEnabled
         set(value) {
             placeHolderEnabled = value
@@ -114,63 +115,65 @@ class ZoomHelper {
     private var lastScale = -10f
     private var enabled = true
 
-    var isEnabled:Boolean
+    var isEnabled: Boolean
         get() = enabled
         set(value) {
             enabled = value
-            if (zoomableView!=null && !isAnimating){
+            if (zoomableView != null && !isAnimating) {
                 animateDismiss()
             }
         }
 
-    private fun init(context: Context){
-        if (dismissDuration<0)
-        dismissDuration = context.resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
+    private fun init(context: Context) {
+        if (dismissDuration < 0)
+            dismissDuration =
+                context.resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
     }
 
     /**
      * handle touch event for an specific View or ViewGroup and its children
      * call this method in [Activity.dispatchTouchEvent]
      */
-    fun dispatchTouchEvent(ev: MotionEvent,parent:View) :Boolean{
-        return load(ev,parent)
+    fun dispatchTouchEvent(ev: MotionEvent, parent: View): Boolean {
+        return load(ev, parent)
     }
 
     /**
      * handle touch event for a Fragment
      * call this method in [Activity.dispatchTouchEvent]
      */
-    fun dispatchTouchEvent(ev: MotionEvent,fragment:androidx.fragment.app.Fragment) :Boolean{
-        if (fragment.view == null) return false;
-        return load(ev,fragment.view!!)
+    fun dispatchTouchEvent(ev: MotionEvent, fragment: androidx.fragment.app.Fragment): Boolean {
+        if (fragment.view == null)
+            return false
+        return load(ev, fragment.requireView())
     }
 
     /**
      * handle touch event for an Activity
      * call this method in [Activity.dispatchTouchEvent]
      */
-    fun dispatchTouchEvent(ev: MotionEvent,parent:Activity) :Boolean{
-        return load(ev,parent.findViewById(android.R.id.content) as View)
+    fun dispatchTouchEvent(ev: MotionEvent, parent: Activity): Boolean {
+        return load(ev, parent.findViewById(android.R.id.content) as View)
     }
 
     /**
      * handle touch event for specific Views or ViewGroups and their children
      * call this method in [Activity.dispatchTouchEvent]
      */
-    fun dispatchTouchEvent(ev: MotionEvent, vararg parents: View):Boolean{
-        return load(ev,*parents)
+    fun dispatchTouchEvent(ev: MotionEvent, vararg parents: View): Boolean {
+        return load(ev, *parents)
     }
 
-    private fun load(ev: MotionEvent, vararg parents: View):Boolean{
+    private fun load(ev: MotionEvent, vararg parents: View): Boolean {
         if (!isEnabled) return isAnimating
         if (parents.isEmpty()) return false
         val context = parents[0].context
         init(context)
 
-        if (ev.pointerCount>=2){
-            if (zoomableView==null){
-                val view:View? = Utils.findZoomableView(ev, *parents) ?: return false;
-                zoomableView = view;
+        if (ev.pointerCount >= 2) {
+            if (zoomableView == null) {
+                val view: View? = Utils.findZoomableView(ev, *parents) ?: return false
+                zoomableView = view
 
                 reset()
                 isAnimating = false
@@ -183,32 +186,38 @@ class ZoomHelper {
                 shadowView?.setBackgroundColor(shadowColor)
                 shadowView?.alpha = 0f
 
-                frameLayout.addView(shadowView,FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT))
+                frameLayout.addView(
+                    shadowView, FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                    )
+                )
 
-                dialog = Dialog(context,layoutTheme)
-                dialog?.addContentView(frameLayout,ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT))
+                dialog = Dialog(context, layoutTheme)
+                dialog?.addContentView(
+                    frameLayout, ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                )
                 dialogCreated(frameLayout)
                 dialog?.show()
 
-                zoomableViewParent = view?.parent as ViewGroup;
+                zoomableViewParent = view?.parent as ViewGroup
                 viewIndex = zoomableViewParent?.indexOfChild(zoomableView)
                 viewLayoutParams = view.layoutParams
 
-                viewFrameLayoutParams = FrameLayout.LayoutParams(view.width,view.height)
+                viewFrameLayoutParams = FrameLayout.LayoutParams(view.width, view.height)
                 viewFrameLayoutParams?.leftMargin = originalXY!![0]
                 viewFrameLayoutParams?.topMargin = originalXY!![1]
 
                 placeHolderView = PlaceHolderView(view)
                 placeHolderView?.isEnabled = placeHolderEnabled
 
-                val index: Int = viewIndex ?:0
-                zoomableViewParent?.addView(placeHolderView,index,viewLayoutParams)
+                val index: Int = viewIndex ?: 0
+                zoomableViewParent?.addView(placeHolderView, index, viewLayoutParams)
                 zoomableViewParent?.removeView(view)
-                frameLayout.addView(zoomableView,viewFrameLayoutParams)
+                frameLayout.addView(zoomableView, viewFrameLayoutParams)
 
                 if (placeHolderEnabled) {
                     view.postDelayed(Runnable {
@@ -221,56 +230,71 @@ class ZoomHelper {
                 }
 
                 val p1 = MotionEvent.PointerCoords()
-                ev.getPointerCoords(0,p1)
+                ev.getPointerCoords(0, p1)
 
                 val p2 = MotionEvent.PointerCoords()
-                ev.getPointerCoords(1,p2)
+                ev.getPointerCoords(1, p2)
 
-                originalDistance = Utils.getDistance(p1.x.toDouble(),p1.y.toDouble(),p2.x.toDouble(),p2.y.toDouble())
-                twoPointerCenter = intArrayOf(((p2.x+p1.x)/2).toInt(),((p2.y+p1.y)/2).toInt())
+                originalDistance = Utils.getDistance(
+                    p1.x.toDouble(),
+                    p1.y.toDouble(),
+                    p2.x.toDouble(),
+                    p2.y.toDouble()
+                )
+                twoPointerCenter =
+                    intArrayOf(((p2.x + p1.x) / 2).toInt(), ((p2.y + p1.y) / 2).toInt())
 
                 pivotX = (ev.rawX - originalXY!![0])
                 pivotY = (ev.rawY - originalXY!![1])
 
                 stateChanged()
-            }else{
+            } else {
                 val p1 = MotionEvent.PointerCoords()
-                ev.getPointerCoords(0,p1)
+                ev.getPointerCoords(0, p1)
 
                 val p2 = MotionEvent.PointerCoords()
-                ev.getPointerCoords(1,p2)
+                ev.getPointerCoords(1, p2)
 
-                val newCenter = intArrayOf(((p2.x+p1.x)/2).toInt(),((p2.y+p1.y)/2).toInt())
-                val currentDistance = Utils.getDistance(p1.x.toDouble(),p1.y.toDouble(),p2.x.toDouble(),p2.y.toDouble())
-                val pctIncrease = (currentDistance.toDouble() - originalDistance.toDouble()) / originalDistance.toDouble();
+                val newCenter = intArrayOf(((p2.x + p1.x) / 2).toInt(), ((p2.y + p1.y) / 2).toInt())
+                val currentDistance = Utils.getDistance(
+                    p1.x.toDouble(),
+                    p1.y.toDouble(),
+                    p2.x.toDouble(),
+                    p2.y.toDouble()
+                )
+                val pctIncrease =
+                    (currentDistance.toDouble() - originalDistance.toDouble()) / originalDistance.toDouble()
 
                 zoomableView!!.pivotX = pivotX
                 zoomableView!!.pivotY = pivotY
 
-                var scale = (1+pctIncrease).toFloat()
-                if (minScale!=-1f) scale = max(minScale,scale)
-                if (maxScale!=-1f) scale = min(maxScale,scale)
-                scale = max(Float.MIN_VALUE,scale)
-                scale = min(Float.MAX_VALUE,scale)
+                var scale = (1 + pctIncrease).toFloat()
+                if (minScale != -1f) scale = max(minScale, scale)
+                if (maxScale != -1f) scale = min(maxScale, scale)
+                scale = max(Float.MIN_VALUE, scale)
+                scale = min(Float.MAX_VALUE, scale)
 
                 zoomableView!!.scaleX = scale
                 zoomableView!!.scaleY = scale
 
-                if (twoPointerCenter!=null && originalXY!=null){
-                    updateZoomableViewMargins((newCenter[0]- twoPointerCenter!![0]+ originalXY!![0]).toFloat(),
-                        (newCenter[1]- twoPointerCenter!![1]+ originalXY!![1].toFloat()))
+                if (twoPointerCenter != null && originalXY != null) {
+                    updateZoomableViewMargins(
+                        (newCenter[0] - twoPointerCenter!![0] + originalXY!![0]).toFloat(),
+                        (newCenter[1] - twoPointerCenter!![1] + originalXY!![1].toFloat())
+                    )
                 }
 
-                scaleChanged(scale,ev)
-                if (lastScale!=-10f && lastScale==scale) return true
+                scaleChanged(scale, ev)
+                if (lastScale != -10f && lastScale == scale) return true
                 lastScale = scale
-                shadowView?.alpha = max(min(maxShadowAlpha,abs(pctIncrease/shadowAlphaFactory).toFloat()),0f)
+                shadowView?.alpha =
+                    max(min(maxShadowAlpha, abs(pctIncrease / shadowAlphaFactory).toFloat()), 0f)
             }
             return true
-        }else{
-            if (zoomableView!=null){
-                if (!isAnimating){
-                    animateDismiss();
+        } else {
+            if (zoomableView != null) {
+                if (!isAnimating) {
+                    animateDismiss()
                 }
                 return true
             }
@@ -279,36 +303,50 @@ class ZoomHelper {
         return false
     }
 
-    private fun reset(){
+    private fun reset() {
         lastScale = -10f
     }
 
-    private fun animateDismiss(){
+    private fun animateDismiss() {
         reset()
-        if (zoomableView==null || originalXY==null) return
-        isAnimating = true;
-        val scaleYStart = zoomableView!!.scaleY;
-        val scaleXStart = zoomableView!!.scaleX;
+        if (zoomableView == null || originalXY == null) return
+        isAnimating = true
+        val scaleYStart = zoomableView!!.scaleY
+        val scaleXStart = zoomableView!!.scaleX
         val leftMarginStart = viewFrameLayoutParams!!.leftMargin
         val topMarginStart = viewFrameLayoutParams!!.topMargin
         val alphaStart = shadowView!!.alpha
 
-        val scaleYEnd = 1f;
-        val scaleXEnd = 1f;
+        val scaleYEnd = 1f
+        val scaleXEnd = 1f
         val leftMarginEnd = originalXY!![0]
         val topMarginEnd = originalXY!![1]
         val alphaEnd = 0f
 
-        val valueAnimator = ValueAnimator.ofFloat(0f,1f)
+        val valueAnimator = ValueAnimator.ofFloat(0f, 1f)
         valueAnimator.duration = dismissDuration
-        valueAnimator.addUpdateListener{
+        valueAnimator.addUpdateListener {
             val animatedFraction = it.animatedFraction
-            if (zoomableView!=null && zoomableView!!.parent!=null){
-                updateZoomableView(animatedFraction,scaleYStart,scaleXStart,leftMarginStart
-                    ,topMarginStart,scaleXEnd,scaleYEnd,leftMarginEnd,topMarginEnd)
+            if (zoomableView != null && zoomableView!!.parent != null) {
+                updateZoomableView(
+                    animatedFraction,
+                    scaleYStart,
+                    scaleXStart,
+                    leftMarginStart,
+                    topMarginStart,
+                    scaleXEnd,
+                    scaleYEnd,
+                    leftMarginEnd,
+                    topMarginEnd
+                )
             }
-            if (shadowView!=null){
-                shadowView?.alpha = max(min(maxShadowAlpha,((alphaEnd - alphaStart) * animatedFraction) + alphaStart),0f)
+            if (shadowView != null) {
+                shadowView?.alpha = max(
+                    min(
+                        maxShadowAlpha,
+                        ((alphaEnd - alphaStart) * animatedFraction) + alphaStart
+                    ), 0f
+                )
             }
         }
         valueAnimator.addListener(object : Animator.AnimatorListener {
@@ -320,44 +358,57 @@ class ZoomHelper {
                 end()
             }
 
-            private fun end(){
-                if (zoomableView!=null && zoomableView!!.parent!=null){
-                    updateZoomableView(1f,scaleYStart,scaleXStart,leftMarginStart
-                                    ,topMarginStart,scaleXEnd,scaleYEnd,leftMarginEnd,topMarginEnd)
+            private fun end() {
+                if (zoomableView != null && zoomableView!!.parent != null) {
+                    updateZoomableView(
+                        1f,
+                        scaleYStart,
+                        scaleXStart,
+                        leftMarginStart,
+                        topMarginStart,
+                        scaleXEnd,
+                        scaleYEnd,
+                        leftMarginEnd,
+                        topMarginEnd
+                    )
                 }
                 dismissDialogAndViews()
                 valueAnimator.removeAllListeners()
                 valueAnimator.removeAllUpdateListeners()
             }
 
-            override fun onAnimationStart(animation: Animator){}
+            override fun onAnimationStart(animation: Animator) {}
             override fun onAnimationRepeat(animation: Animator) {}
         })
         valueAnimator.start()
 
     }
 
-    private fun updateZoomableView(animatedFraction:Float,scaleYStart:Float,scaleXStart:Float,
-                                   leftMarginStart:Int,topMarginStart:Int,scaleXEnd:Float,scaleYEnd:Float,
-                                   leftMarginEnd:Int,topMarginEnd:Int){
-        zoomableView?.scaleX =((scaleXEnd-scaleXStart)*animatedFraction)+scaleXStart
-        zoomableView?.scaleY =((scaleYEnd-scaleYStart)*animatedFraction)+scaleYStart
-        scaleChanged(zoomableView!!.scaleX,null)
+    private fun updateZoomableView(
+        animatedFraction: Float, scaleYStart: Float, scaleXStart: Float,
+        leftMarginStart: Int, topMarginStart: Int, scaleXEnd: Float, scaleYEnd: Float,
+        leftMarginEnd: Int, topMarginEnd: Int
+    ) {
+        zoomableView?.scaleX = ((scaleXEnd - scaleXStart) * animatedFraction) + scaleXStart
+        zoomableView?.scaleY = ((scaleYEnd - scaleYStart) * animatedFraction) + scaleYStart
+        scaleChanged(zoomableView!!.scaleX, null)
 
-        updateZoomableViewMargins(((leftMarginEnd-leftMarginStart)*animatedFraction)+leftMarginStart,
-            ((topMarginEnd-topMarginStart)*animatedFraction)+topMarginStart)
+        updateZoomableViewMargins(
+            ((leftMarginEnd - leftMarginStart) * animatedFraction) + leftMarginStart,
+            ((topMarginEnd - topMarginStart) * animatedFraction) + topMarginStart
+        )
     }
 
-    private fun updateZoomableViewMargins(left:Float,top:Float){
-        if (zoomableView!=null && viewFrameLayoutParams!=null){
+    private fun updateZoomableViewMargins(left: Float, top: Float) {
+        if (zoomableView != null && viewFrameLayoutParams != null) {
             viewFrameLayoutParams!!.leftMargin = left.toInt()
             viewFrameLayoutParams!!.topMargin = top.toInt()
             zoomableView?.layoutParams = viewFrameLayoutParams
         }
     }
 
-    private fun dismissDialogAndViews(){
-        if (zoomableView!=null && zoomableView!!.parent!=null){
+    private fun dismissDialogAndViews() {
+        if (zoomableView != null && zoomableView!!.parent != null) {
             zoomableView?.visibility = View.VISIBLE
             if (placeHolderEnabled) {
                 placeHolderView?.visibility = View.VISIBLE
@@ -366,24 +417,24 @@ class ZoomHelper {
                         dismissDialog()
                         return@Runnable
                     }
-                    val parent = zoomableView!!.parent as ViewGroup;
+                    val parent = zoomableView!!.parent as ViewGroup
                     parent.removeView(zoomableView)
-                    if (zoomableViewParent!=null) {
+                    if (zoomableViewParent != null) {
                         zoomableViewParent?.addView(zoomableView!!, viewIndex!!, viewLayoutParams)
                         zoomableViewParent?.removeView(placeHolderView)
                     }
                     dismissDialog()
                 }, placeHolderDismissDelay)
-            }else{
-                val parent = zoomableView!!.parent as ViewGroup;
+            } else {
+                val parent = zoomableView!!.parent as ViewGroup
                 parent.removeView(zoomableView)
-                if (zoomableViewParent!=null) {
+                if (zoomableViewParent != null) {
                     zoomableViewParent?.addView(zoomableView!!, viewIndex!!, viewLayoutParams)
                     zoomableViewParent?.removeView(placeHolderView)
                 }
                 dismissDialog()
             }
-        }else{
+        } else {
             dismissDialog()
         }
 
@@ -392,8 +443,8 @@ class ZoomHelper {
         stateChanged()
     }
 
-    private fun dismissDialog(){
-        if (dialog!=null){
+    private fun dismissDialog() {
+        if (dialog != null) {
             dialog?.dismiss()
             dialog = null
         }
@@ -401,78 +452,87 @@ class ZoomHelper {
         shadowView = null
         placeHolderView = null
 
-        if (zoomableView!=null){
+        if (zoomableView != null) {
             zoomableView?.invalidate()
-            zoomableView = null;
+            zoomableView = null
         }
 
         isAnimating = false
         isZooming = false
     }
 
-    private fun stateChanged () {
-        if (zoomableView==null) return
-        for (l in onZoomStateChangedListener){
-            l.onZoomStateChanged(this,zoomableView!!,isZooming)
+    private fun stateChanged() {
+        if (zoomableView == null) return
+        for (l in onZoomStateChangedListener) {
+            l.onZoomStateChanged(this, zoomableView!!, isZooming)
         }
     }
 
-    private fun scaleChanged(scale:Float,ev: MotionEvent?){
-        if (zoomableView==null) return
-        for (l in onZoomScaleChangedListener){
-            l.onZoomScaleChanged(this,zoomableView!!,scale,ev)
+    private fun scaleChanged(scale: Float, ev: MotionEvent?) {
+        if (zoomableView == null) return
+        for (l in onZoomScaleChangedListener) {
+            l.onZoomScaleChanged(this, zoomableView!!, scale, ev)
         }
     }
 
-    private fun dialogCreated(layout:FrameLayout){
-        if (zoomableView==null) return
-        for (l in onZoomLayoutCreatorListener){
-            l.onZoomLayoutCreated(this,zoomableView!!,layout)
+    private fun dialogCreated(layout: FrameLayout) {
+        if (zoomableView == null) return
+        for (l in onZoomLayoutCreatorListener) {
+            l.onZoomLayoutCreated(this, zoomableView!!, layout)
         }
     }
 
-    fun addOnZoomStateChangedListener (listener: OnZoomStateChangedListener){
+    fun addOnZoomStateChangedListener(listener: OnZoomStateChangedListener) {
         onZoomStateChangedListener.add(listener)
     }
 
-    fun removeOnZoomStateChangedListener(listener: OnZoomStateChangedListener){
+    fun removeOnZoomStateChangedListener(listener: OnZoomStateChangedListener) {
         onZoomStateChangedListener.remove(listener)
     }
 
-    fun addOnZoomScaleChangedListener (listener: OnZoomScaleChangedListener){
+    fun addOnZoomScaleChangedListener(listener: OnZoomScaleChangedListener) {
         onZoomScaleChangedListener.add(listener)
     }
 
-    fun removeOnZoomScaleChangedListener(listener: OnZoomScaleChangedListener){
+    fun removeOnZoomScaleChangedListener(listener: OnZoomScaleChangedListener) {
         onZoomScaleChangedListener.remove(listener)
     }
 
-    fun addOnZoomLayoutCreatorListener (listener: OnZoomLayoutCreatorListener){
+    fun addOnZoomLayoutCreatorListener(listener: OnZoomLayoutCreatorListener) {
         onZoomLayoutCreatorListener.add(listener)
     }
 
-    fun removeOnZoomLayoutCreatorListener(listener: OnZoomLayoutCreatorListener){
+    fun removeOnZoomLayoutCreatorListener(listener: OnZoomLayoutCreatorListener) {
         onZoomLayoutCreatorListener.remove(listener)
     }
 
 
     interface OnZoomStateChangedListener {
-        fun onZoomStateChanged(zoomHelper: ZoomHelper,zoomableView :View,isZooming: Boolean)
+        fun onZoomStateChanged(zoomHelper: ZoomHelper, zoomableView: View, isZooming: Boolean)
     }
 
     interface OnZoomScaleChangedListener {
-        fun onZoomScaleChanged(zoomHelper: ZoomHelper,zoomableView :View,scale: Float,event: MotionEvent?)
+        fun onZoomScaleChanged(
+            zoomHelper: ZoomHelper,
+            zoomableView: View,
+            scale: Float,
+            event: MotionEvent?
+        )
     }
 
     interface OnZoomLayoutCreatorListener {
-        fun onZoomLayoutCreated(zoomHelper: ZoomHelper,zoomableView: View,zoomLayout: FrameLayout);
+        fun onZoomLayoutCreated(
+            zoomHelper: ZoomHelper,
+            zoomableView: View,
+            zoomLayout: FrameLayout
+        )
     }
 
     /**
      * dismiss zoom layout without animation
      * @see isEnabled
      */
-    fun dismiss(){
+    fun dismiss() {
         dismissDialog()
     }
 
@@ -481,43 +541,44 @@ class ZoomHelper {
      * All the static ZoomHelper settings will change to the default value!
      * Listeners will
      */
-    fun release(){
+    fun release() {
         dismiss()
         InstanceState.release()
     }
 
     companion object {
+
         /**
          * @return true if view is zoomable
          */
-        fun isZoomableView(view: View) = (view.getTag(R.id.zoomable)!=null)
+        fun isZoomableView(view: View) = (view.getTag(R.id.zoomable) != null)
 
         /**
          * Set view to be zoomable
          */
-        fun addZoomableView(view:View) = view.setTag(R.id.zoomable,Object())
+        fun addZoomableView(view: View) = view.setTag(R.id.zoomable, Object())
 
         /**
          * Set view to be zoomable
          * @param tag any tag
          * @see getZoomableViewTag (View)
          */
-        fun addZoomableView(view:View,tag:Any?) {
-            var vt = tag;
-            if (vt==null) vt = Object()
-            view.setTag(R.id.zoomable,vt);
+        fun addZoomableView(view: View, tag: Any?) {
+            var vt = tag
+            if (vt == null) vt = Object()
+            view.setTag(R.id.zoomable, vt)
         }
 
         /**
          * @return zoomableView tag or null if view is not zoomable
          * @see addZoomableView(View,Object)
          */
-        fun getZoomableViewTag(view:View): Any? = view.getTag(R.id.zoomable)
+        fun getZoomableViewTag(view: View): Any? = view.getTag(R.id.zoomable)
 
         /**
          * @see addZoomableView
          */
-        fun removeZoomableView(view:View) = view.setTag(R.id.zoomable, null)
+        fun removeZoomableView(view: View) = view.setTag(R.id.zoomable, null)
 
         fun getInstance() = InstanceState.getZoomHelper()
 
@@ -525,12 +586,13 @@ class ZoomHelper {
          * @return true if layout is skipping
          * @see skipLayout(View,Boolean)
          */
-        fun isSkippingLayout(view:View) = (view.getTag(R.id.skip_zoom_layout)!= null)
+        fun isSkippingLayout(view: View) = (view.getTag(R.id.skip_zoom_layout) != null)
 
         /**
          * skip layout and all layout's zoomable children
          */
-        fun skipLayout (view:View,skip:Boolean) = view.setTag(R.id.skip_zoom_layout,if (skip) Object() else null)
+        fun skipLayout(view: View, skip: Boolean) =
+            view.setTag(R.id.skip_zoom_layout, if (skip) Object() else null)
     }
 
 }

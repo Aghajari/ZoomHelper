@@ -9,7 +9,7 @@ import com.aghajari.zoomhelper.ZoomableActivity
 
 class RecyclerViewActivity : ZoomableActivity() {
 
-    lateinit var adapter:Adapter
+    lateinit var adapter: Adapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

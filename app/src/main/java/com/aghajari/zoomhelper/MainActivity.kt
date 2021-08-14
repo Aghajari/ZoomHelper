@@ -16,15 +16,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    fun onSimpleActivityClick(v:View){
+    fun onSimpleActivityClick(v: View) {
         startActivity(Intent(this, SimpleActivity::class.java))
     }
 
-    fun onCustomActivityClick(v:View){
+    fun onCustomActivityClick(v: View) {
         startActivity(Intent(this, CustomActivity::class.java))
     }
 
-    fun onRecyclerViewActivityClick(v:View){
+    fun onRecyclerViewActivityClick(v: View) {
         startActivity(Intent(this, RecyclerViewActivity::class.java))
     }
 }

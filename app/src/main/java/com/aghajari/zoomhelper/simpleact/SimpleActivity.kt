@@ -29,8 +29,16 @@ class SimpleActivity : ZoomableActivity(), ZoomHelper.OnZoomStateChangedListener
             .into(imageView)
     }
 
-    override fun onZoomStateChanged(zoomHelper: ZoomHelper, zoomableView: View, isZooming: Boolean) {
-        Toast.makeText(this,if (isZooming) "Zooming started" else "Zooming ended",Toast.LENGTH_SHORT).show()
+    override fun onZoomStateChanged(
+        zoomHelper: ZoomHelper,
+        zoomableView: View,
+        isZooming: Boolean
+    ) {
+        Toast.makeText(
+            this,
+            if (isZooming) "Zooming started" else "Zooming ended",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     override fun onResume() {

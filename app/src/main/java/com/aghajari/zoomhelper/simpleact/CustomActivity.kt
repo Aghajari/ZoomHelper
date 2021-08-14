@@ -35,7 +35,7 @@ class CustomActivity : AppCompatActivity() {
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        return zoomHelper.dispatchTouchEvent(ev!!,this) || super.dispatchTouchEvent(ev)
+        return zoomHelper.dispatchTouchEvent(ev!!, this) || super.dispatchTouchEvent(ev)
     }
 
 
